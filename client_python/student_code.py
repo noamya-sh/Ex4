@@ -9,7 +9,9 @@ import json
 from pygame import gfxdraw
 import pygame
 from pygame import *
-
+from Pokemon import *
+from Agent import *
+# from geometry.GraphAlgo import *
 # init pygame
 WIDTH, HEIGHT = 1080, 720
 
@@ -35,7 +37,8 @@ graph_json = client.get_graph()
 
 FONT = pygame.font.SysFont('Arial', 20, bold=True)
 # load the json string into SimpleNamespace Object
-
+# g = GraphAlgo()
+# g.load_from_json(graph_json)
 graph = json.loads(
     graph_json, object_hook=lambda json_dict: SimpleNamespace(**json_dict))
 
@@ -70,7 +73,7 @@ def my_scale(data, x=False, y=False):
 radius = 15
 
 client.add_agent("{\"id\":0}")
-# client.add_agent("{\"id\":1}")
+client.add_agent("{\"id\":1}")
 # client.add_agent("{\"id\":2}")
 # client.add_agent("{\"id\":3}")
 
@@ -81,22 +84,18 @@ client.start()
 The code below should be improved significantly:
 The GUI and the "algo" are mixed - refactoring using MVC design pattern is required.
 """
-
+path = []
 while client.is_running() == 'true':
-    pokemons = json.loads(client.get_pokemons(),
-                          object_hook=lambda d: SimpleNamespace(**d)).Pokemons
-    pokemons = [p.Pokemon for p in pokemons]
+    data = json.loads(client.get_pokemons())
+    pokemons = [Pokemon(**p['Pokemon']) for p in data['Pokemons']]
     for p in pokemons:
-        x, y, _ = p.pos.split(',')
-        p.pos = SimpleNamespace(x=my_scale(
-            float(x), x=True), y=my_scale(float(y), y=True))
-    agents = json.loads(client.get_agents(),
-                        object_hook=lambda d: SimpleNamespace(**d)).Agents
-    agents = [agent.Agent for agent in agents]
+        p._pos = (my_scale(p._pos[0],x=True), my_scale(p._pos[1], y=True),0.0)
+
+    data = json.loads(client.get_agents())
+    agents = [Agent(**a['Agent']) for a in data['Agents']]
+    # agents = [agent.Agent for agent in agents]
     for a in agents:
-        x, y, _ = a.pos.split(',')
-        a.pos = SimpleNamespace(x=my_scale(
-            float(x), x=True), y=my_scale(float(y), y=True))
+        a._pos = (my_scale(a._pos[0],x=True), my_scale(a._pos[1], y=True),0.0)
     # check events
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -140,11 +139,23 @@ while client.is_running() == 'true':
 
     # draw agents
     for agent in agents:
-        pygame.draw.circle(screen, Color(122, 61, 23),
-                           (int(agent.pos.x), int(agent.pos.y)), 10)
+        pik = pygame.image.load("pik.png")
+        pik.convert()
+        pik = pygame.transform.scale(pik, (50, 50))
+        r = pik.get_rect()
+        r.center = (int(agent._pos[0]), int(agent._pos[1]))
+        screen.blit(pik, r)
+        # pygame.draw.circle(screen, Color(122, 61, 23),
+        #                    (int(agent.pos.x), int(agent.pos.y)), 10)
     # draw pokemons (note: should differ (GUI wise) between the up and the down pokemons (currently they are marked in the same way).
     for p in pokemons:
-        pygame.draw.circle(screen, Color(0, 255, 255), (int(p.pos.x), int(p.pos.y)), 10)
+        pokball = pygame.image.load("Poke_Ball.png")
+        pokball.convert()
+        pokball = pygame.transform.scale(pokball, (25, 25))
+        r = pokball.get_rect()
+        r.center = (int(p._pos[0]), int(p._pos[1]))
+        screen.blit(pokball, r)
+        # pygame.draw.circle(screen, Color(0, 255, 255), (int(p.pos.x), int(p.pos.y)), 10)
 
     # update screen changes
     display.update()
@@ -155,7 +166,7 @@ while client.is_running() == 'true':
     # choose next edge
     for agent in agents:
         if agent.dest == -1:
-            next_node = (agent.src - 1) % len(graph.Nodes)
+            next_node = (agent.src +1) % len(graph.Nodes)
             client.choose_next_edge(
                 '{"agent_id":' + str(agent.id) + ', "next_node_id":' + str(next_node) + '}')
             ttl = client.time_to_end()
