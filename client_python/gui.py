@@ -64,7 +64,7 @@ class gui:
 
                 # draw the line
                 p = np.subtract((dest_x, dest_y), segment((src_x, src_y), (dest_x, dest_y)))
-                line(self.screen, Color(61, 72, 126),(src_x, src_y), p)
+                line(self.screen, Color(61, 72, 126), (src_x, src_y), p)
             for e in graph.edges(data=True):
                 # find the edge nodes
                 src = next(n for n in graph.nodes(data=True) if n[0] == e[0])
@@ -78,7 +78,7 @@ class gui:
 
                 # draw the line
                 p = np.subtract((dest_x, dest_y), segment((src_x, src_y), (dest_x, dest_y)))
-                arrow(self.screen, Color(0, 0, 0),(src_x, src_y), p, 10)
+                arrow(self.screen, Color(0, 0, 0), (src_x, src_y), p, 10)
             for n in graph.nodes(data=True):
                 x = self.my_scale(n[1]['pos'][0], x=True)
                 y = self.my_scale(n[1]['pos'][1], y=True)
@@ -92,7 +92,7 @@ class gui:
                 rect = id_srf.get_rect(center=(x, y))
                 self.screen.blit(id_srf, rect)
             for p in pokemons:
-                if p.get_type() == -1:
+                if p.get_type() == 1:
                     pokball.convert()
                     pokball = pg.transform.scale(pokball, (50, 50))
                     r = pokball.get_rect()
@@ -111,8 +111,6 @@ class gui:
                 r.center = (int(self.my_scale(agent._pos[0], x=True)), int(self.my_scale(agent._pos[1], y=True)))
                 self.screen.blit(pik, r)
 
-
-
             # for agent in agents:
             #     if agent.dest == -1:
             #         next_node = (agent.src + 1) % graph.number_of_nodes()
@@ -124,9 +122,8 @@ class gui:
             # control.client.move()
             # control.attach()
 
-
-            f = FONT.render(str(control.get_score()), True, Color(0, 0, 0))
-            self.screen.blit(f, (WIDTH - 100, HEIGHT - 100))
+            f = FONT.render("Score: " + str(control.get_score()), True, Color(0, 0, 0))
+            self.screen.blit(f, (self.screen.get_width() - 100, self.screen.get_height() - 100))
             display.update()
 
             # refresh rate
@@ -134,6 +131,7 @@ class gui:
             control.attach()
             now = time.time()
             control.moving(now - t)
+
     # decorate scale with the correct values
 
     def my_scale(self, data, x=False, y=False):

@@ -35,8 +35,8 @@ class Controller:
         # to check
         cmp = []
         i = 0
+        it = iter(self.pokemons.keys())
         while i < k and i < len(self.pokemons):
-            it = iter(self.pokemons.keys())
             ed = next(it)
             cmp.append(ed[0])
             self.client.add_agent("{\"id\":" + str(ed[0]) + "}")
@@ -69,12 +69,12 @@ class Controller:
     def get_graph(self):
         return self._graph
 
-    def get_next(self, id: int) -> int:
-        if not self.dict_path[id]:
+    def get_next(self, ag: Agent) -> int:
+        if not self.dict_path[ag.id]:
             return None
-        x = self.dict_path[id][0]
-        self.dict_path[id].remove(x)
-        return x
+        if ag.src == self.dict_path[ag.id][0] and len(self.dict_path[ag.id]) > 1:
+            self.dict_path[ag.id].pop(0)
+        return self.dict_path[ag.id][0]
 
     def _on_edge(self, p: Pokemon, edge) -> bool:
         node_1 = self._graph.nodes[edge[0]]
@@ -97,20 +97,21 @@ class Controller:
                 return e[0], e[1]
         return None
 
-    def _get_new_pokemons(self, curr: List[Pokemon]) -> List[Pokemon]:
-        return [p for p in curr if p not in self.pokemons]
-
     def attach(self):
         if self.client.is_running() != 'true':
             return
         d = json.loads(self.client.get_pokemons())
         tmp = [Pokemon(**p['Pokemon']) for p in d['Pokemons']]
         check = []
-        for ag in self.agents.keys():
+        self.pokemons = {}
+
+        sor = sorted(self.get_agents(), key=lambda a: a._value, reverse=True)
+        kk = [i.id for i in sor]
+        for ag in kk:
             min_dis = math.inf
             min_path = []
             key = None
-            for p in tmp:
+            for p in sorted(tmp, key=lambda p: p.get_value(), reverse=True):
                 edge = self.find_edge(p)
                 check.append(edge)
                 if edge not in self.pokemons.keys():
@@ -119,20 +120,23 @@ class Controller:
                     self.pokemons[edge].get_pokemons().append(p.get_pos())
                     self.pokemons[edge].add_value(p.get_value())
                 if not self.pokemons[edge].get_toAgent():
-                    dis = nx.shortest_path_length(self._graph, self.dict_path[ag][-1],
+                    x = self.dict_path[ag][0]
+                    dis = nx.shortest_path_length(self._graph, x,
                                                   edge[0], weight='weight')
-                    pa = nx.shortest_path(self._graph, self.dict_path[ag][-1],
+                    pa = nx.shortest_path(self._graph, x,
                                           edge[0], weight='weight')
                     pa.append(edge[1])
-                    sp = (dis * self.agents[ag].speed * self.agents[ag]._value) / p.get_value()
-                    if set(pa[-2:-1]).issubset(self.dict_path[ag]):
-                        continue
+                    dis += self._graph.edges[edge[0], edge[1]]['weight']
+                    sp = (dis * sor[ag].speed) / self.pokemons[edge].get_value()
+                    # if set(pa[-2:-1]).issubset(self.dict_path[ag]):
+                    #     continue
+
                     if sp < min_dis:
                         min_dis = sp
                         min_path = pa
                         key = edge
             if min_dis != math.inf:
-                self.dict_path[ag] += min_path
+                self.dict_path[ag] = min_path
                 self.pokemons[key].set_toAgent(True)
         list = [k for k in self.pokemons.keys()]
         for k in list:
@@ -157,15 +161,16 @@ class Controller:
         agents = self.get_agents()
         flag = False
         for a in agents:
+            print(a.id, self.dict_path[a.id])
             if a.dest == -1:
-                next_node = self.get_next(a.id)
+                next_node = self.get_next(a)
                 self.client.choose_next_edge(
                     '{"agent_id":' + str(a.id) + ', "next_node_id":' + str(next_node) + '}')
                 flag = True
         d = json.loads(self.client.get_info())
         k = d['GameServer']['moves']
-        if k < t * 10 and not flag:
-            print(k)
+        if k < t * 1000000 and not flag:
+            # print(k)
             self.client.move()
 
     def get_score(self):
