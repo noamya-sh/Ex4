@@ -1,7 +1,9 @@
 import json
 import math
+import random
 from typing import List
 
+from Edge_Pok import *
 from Agent import *
 from Pokemon import *
 from client import *
@@ -14,12 +16,44 @@ HOST = '127.0.0.1'
 
 class Controller:
     def __init__(self):
-        client = Client()
-        client.start_connection(HOST, PORT)
-        self._graph = self.init_graph(client.get_graph())
+        self.client = Client()
+        self.client.start_connection(HOST, PORT)
+        self._graph = self.init_graph(self.client.get_graph())
+        d = json.loads(self.client.get_pokemons())
+        self.pokemons = {}
+        tmp = [Pokemon(**p['Pokemon']) for p in d['Pokemons']]
+        for p in tmp:
+            edge = self.find_edge(p)
+            self.pokemons[edge] = Edge_Pok(p.get_pos())  # p.value
+            # else:
+            #     self.pokemons[edge] += p.value
+
         self.dict_path = {}
-        d = json.loads(client.get_pokemons())
-        self.pokemons = [Pokemon(**p['Pokemon']) for p in d['Pokemons']]
+        d = json.loads(self.client.get_info())
+        k = d['GameServer']['agents']
+
+        # to check
+        cmp = []
+        i = 0
+        while i < k and i < len(self.pokemons):
+            it = iter(self.pokemons.keys())
+            ed = next(it)
+            cmp.append(ed[0])
+            self.client.add_agent("{\"id\":" + str(ed[0]) + "}")
+            # self.dict_path[src] = [src]
+            i += 1
+        while i < k:
+            x = random.randint(0, self._graph.number_of_nodes() - 1)
+            if x not in cmp:
+                self.client.add_agent("{\"id\":" + str(x) + "}")
+                # self.dict_path[x] = [x]
+                cmp.append(x)
+                i += 1
+
+        d = json.loads(self.client.get_agents())
+        self.agents = {a['Agent']['id']: Agent(**a['Agent']) for a in d['Agents']}
+        for k, v in self.agents.items():
+            self.dict_path[k] = [v.src]
 
     def init_graph(self, json_str) -> nx.DiGraph:
         dg = nx.DiGraph()
@@ -32,17 +66,15 @@ class Controller:
             dg.add_edge(edge['src'], edge['dest'], weight=edge['w'])
         return dg
 
-    def init_agents(self, agents: list[Agent]) -> None:
-        for a in agents:
-            self.dict_path[a.id] = []
-
     def get_graph(self):
         return self._graph
 
     def get_next(self, id: int) -> int:
         if not self.dict_path[id]:
             return None
-        return self.dict_path[id][0]
+        x = self.dict_path[id][0]
+        self.dict_path[id].remove(x)
+        return x
 
     def _on_edge(self, p: Pokemon, edge) -> bool:
         node_1 = self._graph.nodes[edge[0]]
@@ -52,46 +84,111 @@ class Controller:
             return False
         pos_1 = node_1['pos']
         pos_2 = node_2['pos']
-        pos = p.get_pos()
-        x1, x2, x3 = pos_1[0], pos_2[0], pos[0]
-        y1, y2, y3 = pos_1[1], pos_2[1], pos[1]
-        p1 = np.array([x1, y1])
-        p2 = np.array([x2, y2])
-        p3 = np.array([x3, y3])
+        pos3 = p.get_pos()
+        p1 = np.array([pos_1[0], pos_1[1]])
+        p2 = np.array([pos_2[0], pos_2[1]])
+        p3 = np.array([pos3[0], pos3[1]])
         d = np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
         return math.isclose(0, d, abs_tol=1e-09)
 
     def find_edge(self, p: Pokemon) -> tuple:
         for e in self._graph.edges.data():
             if self._on_edge(p, e):
-                return e
+                return e[0], e[1]
         return None
 
     def _get_new_pokemons(self, curr: List[Pokemon]) -> List[Pokemon]:
         return [p for p in curr if p not in self.pokemons]
 
-    def _update_pokemons(self):
-        d = json.loads(client.get_pokemons())
-        curr = [Pokemon(**p['Pokemon']) for p in d['Pokemons']]
-        new_p = self._get_new_pokemons(curr)
-        for p in new_p:
-            self.attach(p)
+    def attach(self):
+        if self.client.is_running() != 'true':
+            return
+        d = json.loads(self.client.get_pokemons())
+        tmp = [Pokemon(**p['Pokemon']) for p in d['Pokemons']]
+        check = []
+        for ag in self.agents.keys():
+            min_dis = math.inf
+            min_path = []
+            key = None
+            for p in tmp:
+                edge = self.find_edge(p)
+                check.append(edge)
+                if edge not in self.pokemons.keys():
+                    self.pokemons[edge] = Edge_Pok(edge)
+                if p.get_pos() not in self.pokemons[edge].get_pokemons():
+                    self.pokemons[edge].get_pokemons().append(p.get_pos())
+                    self.pokemons[edge].add_value(p.get_value())
+                if not self.pokemons[edge].get_toAgent():
+                    dis = nx.shortest_path_length(self._graph, self.dict_path[ag][-1],
+                                                  edge[0], weight='weight')
+                    pa = nx.shortest_path(self._graph, self.dict_path[ag][-1],
+                                          edge[0], weight='weight')
+                    pa.append(edge[1])
+                    sp = (dis * self.agents[ag].speed * self.agents[ag]._value) / p.get_value()
+                    if set(pa[-2:-1]).issubset(self.dict_path[ag]):
+                        continue
+                    if sp < min_dis:
+                        min_dis = sp
+                        min_path = pa
+                        key = edge
+            if min_dis != math.inf:
+                self.dict_path[ag] += min_path
+                self.pokemons[key].set_toAgent(True)
+        list = [k for k in self.pokemons.keys()]
+        for k in list:
+            if k not in check:
+                del self.pokemons[k]
 
-    def attach(self, p: Pokemon):
-        pass
+    def get_pokemons(self):
+        if self.client.is_running() != 'true':
+            return
+        d = json.loads(self.client.get_pokemons())
+        return [Pokemon(**p['Pokemon']) for p in d['Pokemons']]
+
+    def get_agents(self) -> List[Agent]:
+        if self.client.is_running() != 'true':
+            return
+        d = json.loads(self.client.get_agents())
+        return [Agent(**a['Agent']) for a in d['Agents']]
+
+    def moving(self, t):
+        if self.client.is_running() != 'true':
+            return
+        agents = self.get_agents()
+        flag = False
+        for a in agents:
+            if a.dest == -1:
+                next_node = self.get_next(a.id)
+                self.client.choose_next_edge(
+                    '{"agent_id":' + str(a.id) + ', "next_node_id":' + str(next_node) + '}')
+                flag = True
+        d = json.loads(self.client.get_info())
+        k = d['GameServer']['moves']
+        if k < t * 10 and not flag:
+            print(k)
+            self.client.move()
+
+    def get_score(self):
+        d = json.loads(self.client.get_info())
+        return d['GameServer']['grade']
 
 
 if __name__ == '__main__':
-    PORT = 6666
-    # server host (default localhost 127.0.0.1)
-    HOST = '127.0.0.1'
-    client = Client()
-    client.start_connection(HOST, PORT)
-    graph_json = client.get_graph()
-    d = Controller(graph_json)
-    print(d._graph.edges.data())
-    data = json.loads(client.get_pokemons())
-    print(data)
-    pokemons = [Pokemon(**p['Pokemon']) for p in data['Pokemons']]
-    for p in pokemons:
-        print(d.find_edge(p))
+    # PORT = 6666
+    # # server host (default localhost 127.0.0.1)
+    # HOST = '127.0.0.1'
+    # client = Client()
+    # client.start_connection(HOST, PORT)
+    # graph_json = client.get_graph()
+    d = Controller()
+    graph = d.get_graph()
+    min_x = min(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][0])[1]['pos'][0]
+    min_y = min(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][1])[1]['pos'][1]
+    max_x = max(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][0])[1]['pos'][0]
+    max_y = max(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][1])[1]['pos'][1]
+    print(min_y)
+    # data = json.loads(client.get_pokemons())
+    # print(data)
+    # pokemons = [Pokemon(**p['Pokemon']) for p in data['Pokemons']]
+    # for p in pokemons:
+    #     print(d.find_edge(p))

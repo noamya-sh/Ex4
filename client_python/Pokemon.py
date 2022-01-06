@@ -11,3 +11,9 @@ class Pokemon:
 
     def get_type(self):
         return self._type
+
+    def get_value(self):
+        return self._value
+
+    def __eq__(self, other):
+        return self._pos == other._pos

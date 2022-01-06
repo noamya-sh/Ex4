@@ -84,6 +84,8 @@ client.start()
 The code below should be improved significantly:
 The GUI and the "algo" are mixed - refactoring using MVC design pattern is required.
 """
+pik = pygame.image.load("pik.png")
+pokball = pygame.image.load("Poke_Ball.png")
 path = []
 while client.is_running() == 'true':
     data = json.loads(client.get_pokemons())
@@ -139,7 +141,7 @@ while client.is_running() == 'true':
 
     # draw agents
     for agent in agents:
-        pik = pygame.image.load("pik.png")
+
         pik.convert()
         pik = pygame.transform.scale(pik, (50, 50))
         r = pik.get_rect()
@@ -149,7 +151,7 @@ while client.is_running() == 'true':
         #                    (int(agent.pos.x), int(agent.pos.y)), 10)
     # draw pokemons (note: should differ (GUI wise) between the up and the down pokemons (currently they are marked in the same way).
     for p in pokemons:
-        pokball = pygame.image.load("Poke_Ball.png")
+
         pokball.convert()
         pokball = pygame.transform.scale(pokball, (25, 25))
         r = pokball.get_rect()

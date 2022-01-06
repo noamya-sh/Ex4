@@ -32,7 +32,7 @@ class Client:
                     "Agent":
                     {
                         "id":0,
-                        "value":0.0,
+                        "_value":0.0,
                         "src":0,
                         "dest":1,
                         "speed":1.0,
@@ -121,7 +121,7 @@ class Client:
             "Pokemons":[
                 {
                     "Pokemon":{
-                        "value":5.0,
+                        "_value":5.0,
                         "type":-1,
                         "pos":"35.197656770719604,32.10191878639921,0.0"
                     }
