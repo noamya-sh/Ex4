@@ -27,15 +27,16 @@ class gui:
         self.screen = display.set_mode((WIDTH, HEIGHT), depth=32, flags=RESIZABLE)
         clock = pg.time.Clock()
         pg.font.init()
-        FONT = pg.font.SysFont('Arial', 20, bold=True)
+        FONT = pg.font.SysFont('Century', 20, bold=False)
+        FONT2 = pg.font.SysFont('Bahnschrift SemiBold', 26, bold=True)
         self.min_x = min(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][0])[1]['pos'][0]
         self.min_y = min(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][1])[1]['pos'][1]
         self.max_x = max(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][0])[1]['pos'][0]
         self.max_y = max(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][1])[1]['pos'][1]
-        pokball = pg.image.load("pik.png")
-        pik = pg.image.load("Poke_Ball.png")
-        pokball2 = pg.image.load('im.png')
-        picture = pg.image.load('forest.jpg')
+        pok1 = pg.image.load("pik.png")
+        pokball = pg.image.load("Poke_Ball.png")
+        pok2 = pg.image.load('im.png')
+        bg = pg.image.load('forest.jpg')
         control.client.start()
         t = time.time()
         while control.client.is_running() == 'true':
@@ -46,9 +47,9 @@ class gui:
                     pg.quit()
                     exit(0)
 
-            picture = pg.transform.scale(picture, self.screen.get_size())
-            rect = picture.get_rect()
-            self.screen.blit(picture, rect)
+            bg = pg.transform.scale(bg, self.screen.get_size())
+            rect = bg.get_rect()
+            self.screen.blit(bg, rect)
             # self.screen.fill(Color(0, 0, 0))
 
             for e in graph.edges(data=True):
@@ -64,7 +65,7 @@ class gui:
 
                 # draw the line
                 p = np.subtract((dest_x, dest_y), segment((src_x, src_y), (dest_x, dest_y)))
-                line(self.screen, Color(61, 72, 126), (src_x, src_y), p)
+                line(self.screen, Color(201, 156, 8), (src_x, src_y), p)
             for e in graph.edges(data=True):
                 # find the edge nodes
                 src = next(n for n in graph.nodes(data=True) if n[0] == e[0])
@@ -78,38 +79,38 @@ class gui:
 
                 # draw the line
                 p = np.subtract((dest_x, dest_y), segment((src_x, src_y), (dest_x, dest_y)))
-                arrow(self.screen, Color(0, 0, 0), (src_x, src_y), p, 10)
+                arrow(self.screen, Color(70, 31, 5), (src_x, src_y), p, 10)
             for n in graph.nodes(data=True):
                 x = self.my_scale(n[1]['pos'][0], x=True)
                 y = self.my_scale(n[1]['pos'][1], y=True)
                 gfxdraw.filled_circle(self.screen, int(x), int(y),
-                                      radius, Color(64, 80, 174))
+                                      radius, Color(126, 206, 7))
                 gfxdraw.aacircle(self.screen, int(x), int(y),
                                  radius, Color(255, 255, 255))
 
                 # draw the node id
-                id_srf = FONT.render(str(n[0]), True, Color(255, 255, 255))
+                id_srf = FONT2.render(str(n[0]), True, Color(0, 0, 0))
                 rect = id_srf.get_rect(center=(x, y))
                 self.screen.blit(id_srf, rect)
             for p in pokemons:
-                if p.get_type() == 1:
-                    pokball.convert()
-                    pokball = pg.transform.scale(pokball, (50, 50))
-                    r = pokball.get_rect()
+                if p.get_type() == -1:
+                    pok1.convert()
+                    pok1 = pg.transform.scale(pok1, (50, 50))
+                    r = pok1.get_rect()
                     r.center = (int(self.my_scale(p._pos[0], x=True)), int(self.my_scale(p._pos[1], y=True)))
-                    self.screen.blit(pokball, r)
+                    self.screen.blit(pok1, r)
                 else:
-                    pokball2.convert()
-                    pokball2 = pg.transform.scale(pokball2, (50, 50))
-                    r = pokball2.get_rect()
+                    pok2.convert()
+                    pok2 = pg.transform.scale(pok2, (50, 50))
+                    r = pok2.get_rect()
                     r.center = (int(self.my_scale(p._pos[0], x=True)), int(self.my_scale(p._pos[1], y=True)))
-                    self.screen.blit(pokball2, r)
+                    self.screen.blit(pok2, r)
             for agent in agents:
-                pik.convert()
-                pik = pg.transform.scale(pik, (40, 40))
-                r = pik.get_rect()
+                pokball.convert()
+                pokball = pg.transform.scale(pokball, (40, 40))
+                r = pokball.get_rect()
                 r.center = (int(self.my_scale(agent._pos[0], x=True)), int(self.my_scale(agent._pos[1], y=True)))
-                self.screen.blit(pik, r)
+                self.screen.blit(pokball, r)
 
             # for agent in agents:
             #     if agent.dest == -1:
@@ -121,13 +122,20 @@ class gui:
 
             # control.client.move()
             # control.attach()
+            h = self.screen.get_height()
+            w = self.screen.get_width()
+            pg.draw.rect(self.screen, Color(200, 192, 7), pg.Rect(w - 200, h - 80, 200, 80))
 
             f = FONT.render("Score: " + str(control.get_score()), True, Color(0, 0, 0))
-            self.screen.blit(f, (self.screen.get_width() - 100, self.screen.get_height() - 100))
+            self.screen.blit(f, (w - 190, h - 80))
+            f = FONT.render("Moves: " + str(control.get_moves()), True, Color(0, 0, 0))
+            self.screen.blit(f, (w - 190, h - 40))
+            f = FONT.render("Time to end: " + control.get_time_to_end(), True, Color(0, 0, 0))
+            self.screen.blit(f, (w - 190, h - 60))
             display.update()
 
             # refresh rate
-            clock.tick(600)
+            clock.tick(60)
             control.attach()
             now = time.time()
             control.moving(now - t)

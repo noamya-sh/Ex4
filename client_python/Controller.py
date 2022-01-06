@@ -2,7 +2,6 @@ import json
 import math
 import random
 from typing import List
-
 from Edge_Pok import *
 from Agent import *
 from Pokemon import *
@@ -161,7 +160,7 @@ class Controller:
         agents = self.get_agents()
         flag = False
         for a in agents:
-            print(a.id, self.dict_path[a.id])
+            # print(a.id, self.dict_path[a.id])
             if a.dest == -1:
                 next_node = self.get_next(a)
                 self.client.choose_next_edge(
@@ -169,13 +168,23 @@ class Controller:
                 flag = True
         d = json.loads(self.client.get_info())
         k = d['GameServer']['moves']
-        if k < t * 1000000 and not flag:
+        if k < t * 100 and not flag:
             # print(k)
+            k += 1
             self.client.move()
+        return k
 
     def get_score(self):
         d = json.loads(self.client.get_info())
         return d['GameServer']['grade']
+
+    def get_moves(self):
+        d = json.loads(self.client.get_info())
+        return d['GameServer']['moves']
+
+    def get_time_to_end(self):
+        x = int(self.client.time_to_end())
+        return str(x/1000)
 
 
 if __name__ == '__main__':
