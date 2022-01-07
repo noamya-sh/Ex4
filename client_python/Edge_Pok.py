@@ -24,3 +24,6 @@ class Edge_Pok:
 
     def set_toAgent(self, b: bool):
         self._toAgent = b
+
+    def __lt__(self, other):
+        return self._value < other._value

@@ -1,4 +1,3 @@
-
 class Agent:
 
     def __init__(self, id: int, value: float, src: int, dest: int, speed: float, pos: str) -> None:
@@ -10,3 +9,6 @@ class Agent:
         x, y, _ = pos.split(",")
         self._pos = (float(x), float(y), 0.0)
         self.dict_pok = {}
+
+    def get_pos(self):
+        return self._pos

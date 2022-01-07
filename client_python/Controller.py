@@ -13,16 +13,34 @@ PORT = 6666
 HOST = '127.0.0.1'
 
 
+def dist(p1: tuple, p2: tuple):
+    return math.sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2)
+
+
+def init_graph(json_str) -> nx.DiGraph:
+    dg = nx.DiGraph()
+    d = json.loads(json_str)
+    for node in d['Nodes']:
+        x, y, _ = node['pos'].split(",")
+        pos = (float(x), float(y), 0.0)
+        dg.add_node(node['id'], pos=pos)
+    for edge in d['Edges']:
+        dg.add_edge(edge['src'], edge['dest'], weight=edge['w'])
+    return dg
+
+
 class Controller:
     def __init__(self):
         self.client = Client()
         self.client.start_connection(HOST, PORT)
-        self._graph = self.init_graph(self.client.get_graph())
-        d = json.loads(self.client.get_pokemons())
+        self._graph = init_graph(self.client.get_graph())
+
         self.pokemons = {}
+        d = json.loads(self.client.get_pokemons())
         tmp = [Pokemon(**p['Pokemon']) for p in d['Pokemons']]
+
         for p in tmp:
-            edge = self.find_edge(p)
+            edge = self._find_edge(p)
             self.pokemons[edge] = Edge_Pok(p.get_pos())  # p.value
             # else:
             #     self.pokemons[edge] += p.value
@@ -30,7 +48,7 @@ class Controller:
         self.dict_path = {}
         d = json.loads(self.client.get_info())
         k = d['GameServer']['agents']
-
+        self.pokemons = dict(sorted(self.pokemons.items(), key=lambda t: t[1]))
         # to check
         cmp = []
         i = 0
@@ -39,13 +57,11 @@ class Controller:
             ed = next(it)
             cmp.append(ed[0])
             self.client.add_agent("{\"id\":" + str(ed[0]) + "}")
-            # self.dict_path[src] = [src]
             i += 1
         while i < k:
             x = random.randint(0, self._graph.number_of_nodes() - 1)
             if x not in cmp:
                 self.client.add_agent("{\"id\":" + str(x) + "}")
-                # self.dict_path[x] = [x]
                 cmp.append(x)
                 i += 1
 
@@ -54,21 +70,10 @@ class Controller:
         for k, v in self.agents.items():
             self.dict_path[k] = [v.src]
 
-    def init_graph(self, json_str) -> nx.DiGraph:
-        dg = nx.DiGraph()
-        d = json.loads(json_str)
-        for node in d['Nodes']:
-            x, y, _ = node['pos'].split(",")
-            pos = (float(x), float(y), 0.0)
-            dg.add_node(node['id'], pos=pos)
-        for edge in d['Edges']:
-            dg.add_edge(edge['src'], edge['dest'], weight=edge['w'])
-        return dg
-
     def get_graph(self):
         return self._graph
 
-    def get_next(self, ag: Agent) -> int:
+    def _get_next(self, ag: Agent) -> int:
         if not self.dict_path[ag.id]:
             return None
         if ag.src == self.dict_path[ag.id][0] and len(self.dict_path[ag.id]) > 1:
@@ -81,16 +86,16 @@ class Controller:
         edge_type = 1 if edge[0] < edge[1] else -1
         if p.get_type() != edge_type:
             return False
-        pos_1 = node_1['pos']
-        pos_2 = node_2['pos']
-        pos3 = p.get_pos()
-        p1 = np.array([pos_1[0], pos_1[1]])
-        p2 = np.array([pos_2[0], pos_2[1]])
-        p3 = np.array([pos3[0], pos3[1]])
+        p1 = node_1['pos']
+        p2 = node_2['pos']
+        p3 = p.get_pos()
+        p1 = np.array([p1[0], p1[1]])
+        p2 = np.array([p2[0], p2[1]])
+        p3 = np.array([p3[0], p3[1]])
         d = np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
         return math.isclose(0, d, abs_tol=1e-09)
 
-    def find_edge(self, p: Pokemon) -> tuple:
+    def _find_edge(self, p: Pokemon) -> tuple:
         for e in self._graph.edges.data():
             if self._on_edge(p, e):
                 return e[0], e[1]
@@ -104,14 +109,15 @@ class Controller:
         check = []
         self.pokemons = {}
 
-        sor = sorted(self.get_agents(), key=lambda a: a._value, reverse=True)
-        kk = [i.id for i in sor]
-        for ag in kk:
+        sor = sorted(self.get_agents(), key=lambda a: a.speed)
+
+        ind_ag = [i.id for i in sor]
+        for ag in ind_ag:
             min_dis = math.inf
             min_path = []
             key = None
             for p in sorted(tmp, key=lambda p: p.get_value(), reverse=True):
-                edge = self.find_edge(p)
+                edge = self._find_edge(p)
                 check.append(edge)
                 if edge not in self.pokemons.keys():
                     self.pokemons[edge] = Edge_Pok(edge)
@@ -137,10 +143,6 @@ class Controller:
             if min_dis != math.inf:
                 self.dict_path[ag] = min_path
                 self.pokemons[key].set_toAgent(True)
-        list = [k for k in self.pokemons.keys()]
-        for k in list:
-            if k not in check:
-                del self.pokemons[k]
 
     def get_pokemons(self):
         if self.client.is_running() != 'true':
@@ -158,17 +160,25 @@ class Controller:
         if self.client.is_running() != 'true':
             return
         agents = self.get_agents()
+        poks = []
+        for p in self.pokemons.values():
+            if len(p.get_pokemons()) > 0:
+                poks += p.get_pokemons()
         flag = False
+        flag2 = False
         for a in agents:
             # print(a.id, self.dict_path[a.id])
+            for pos in poks:
+                if dist(a.get_pos(), pos) < 1e-09:
+                    flag2 = True
             if a.dest == -1:
-                next_node = self.get_next(a)
+                next_node = self._get_next(a)
                 self.client.choose_next_edge(
                     '{"agent_id":' + str(a.id) + ', "next_node_id":' + str(next_node) + '}')
                 flag = True
         d = json.loads(self.client.get_info())
         k = d['GameServer']['moves']
-        if k < t * 100 and not flag:
+        if k < t * 10 and (not flag or flag2):
             # print(k)
             k += 1
             self.client.move()
@@ -183,26 +193,17 @@ class Controller:
         return d['GameServer']['moves']
 
     def get_time_to_end(self):
-        x = int(self.client.time_to_end())
-        return str(x/1000)
+        x = round(int(self.client.time_to_end())/ 1000,ndigits=2)
+        return str(x)
+
+    def stop_game(self):
+        self.client.stop()
+        exit(0)
+
+    def set_start(self) -> None:
+        self.client.start()
+
+    def is_run(self) -> bool:
+        return self.client.is_running() == 'true'
 
 
-if __name__ == '__main__':
-    # PORT = 6666
-    # # server host (default localhost 127.0.0.1)
-    # HOST = '127.0.0.1'
-    # client = Client()
-    # client.start_connection(HOST, PORT)
-    # graph_json = client.get_graph()
-    d = Controller()
-    graph = d.get_graph()
-    min_x = min(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][0])[1]['pos'][0]
-    min_y = min(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][1])[1]['pos'][1]
-    max_x = max(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][0])[1]['pos'][0]
-    max_y = max(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][1])[1]['pos'][1]
-    print(min_y)
-    # data = json.loads(client.get_pokemons())
-    # print(data)
-    # pokemons = [Pokemon(**p['Pokemon']) for p in data['Pokemons']]
-    # for p in pokemons:
-    #     print(d.find_edge(p))
