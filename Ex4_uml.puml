@@ -1,0 +1,88 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+'abstract class AbstractList
+'abstract AbstractCollection
+'interface List
+'interface Collection
+
+class Ex4 {
++main()
+}
+class Pokemon{
++get_pos()
++get_value()
++get_type()
+}
+class Edge_pok{
++get_is_attached()
++set_is_attached()
++get_edge()
++get_pokemons()
++get_value()
++add_value()
+}
+class Agent{
++get_id()
++get_pos()
++get_value()
++get_speed()
++get_src()
++get_dest()
+}
+class Controller{
++init_graph()
++get_graph()
+-_get_next()
+-_on_edge()
+-_find_edge()
++attach()
++moving()
++get_pokemons()
++get_agents()
++get_score()
++get_moves()
++get_time_to_end()
++stop_game()
+}
+class PokemonGame{
++scale()
+-my_scale()
+-_get_x_y()
++line()
++segment()
++arrow()
++normalize()
+
+}
+class Button{
++add_click_listener()
++check()
++render()
+}
+class Client{
++start_connection()
++start()
++stop()
+-__send_message()
++get_agents()
++add_agent()
++get_graph()
++get_info()
++get_pokemons()
++is_running()
++time_to_end()
++move()
++choose_next_edge()
++log_in()
++stop_connection()
+}
+Button <-- PokemonGame
+Agent <-- Controller
+Pokemon <-- Controller
+Edge_pok <-- Controller
+PokemonGame -> Controller
+Ex4 --> PokemonGame
+Controller -> Client
+Controller <- Client
+@enduml

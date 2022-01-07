@@ -67,7 +67,7 @@ class PokemonGame:
                 dest = next(n for n in graph.nodes(data=True) if n[0] == e[1])
 
                 # scaled positions
-                src_x, src_y, dest_x, dest_y = self.get_x_y(src, dest)
+                src_x, src_y, dest_x, dest_y = self._get_x_y(src, dest)
                 # draw the line
                 p = np.subtract((dest_x, dest_y), segment((src_x, src_y), (dest_x, dest_y)))
                 line(self.screen, Color(201, 156, 8), (src_x, src_y), p)
@@ -77,14 +77,14 @@ class PokemonGame:
                 dest = next(n for n in graph.nodes(data=True) if n[0] == e[1])
 
                 # scaled positions
-                src_x, src_y, dest_x, dest_y = self.get_x_y(src, dest)
+                src_x, src_y, dest_x, dest_y = self._get_x_y(src, dest)
                 # draw the arrow
                 p = np.subtract((dest_x, dest_y), segment((src_x, src_y), (dest_x, dest_y)))
                 arrow(self.screen, Color(70, 31, 5), (src_x, src_y), p, 10)
 
             for n in graph.nodes(data=True):
-                x = self.my_scale(n[1]['pos'][0], x=True)
-                y = self.my_scale(n[1]['pos'][1], y=True)
+                x = self._my_scale(n[1]['pos'][0], x=True)
+                y = self._my_scale(n[1]['pos'][1], y=True)
                 gfxdraw.filled_circle(self.screen, int(x), int(y),
                                       radius, Color(2, 158, 106))
                 gfxdraw.aacircle(self.screen, int(x), int(y),
@@ -98,16 +98,19 @@ class PokemonGame:
             for p in pokemons:
                 if p.get_type() == -1:
                     r = pok1.get_rect()
-                    r.center = (int(self.my_scale(p.get_pos()[0], x=True)), int(self.my_scale(p.get_pos()[1], y=True)))
+                    r.center = (int(self._my_scale(p.get_pos()[0], x=True)), int(
+                        self._my_scale(p.get_pos()[1], y=True)))
                     self.screen.blit(pok1, r)
                 else:
                     r = pok2.get_rect()
-                    r.center = (int(self.my_scale(p.get_pos()[0], x=True)), int(self.my_scale(p.get_pos()[1], y=True)))
+                    r.center = (int(self._my_scale(p.get_pos()[0], x=True)), int(
+                        self._my_scale(p.get_pos()[1], y=True)))
                     self.screen.blit(pok2, r)
 
             for agent in agents:
                 r = pokball.get_rect()
-                r.center = (int(self.my_scale(agent.get_pos()[0], x=True)), int(self.my_scale(agent.get_pos()[1], y=True)))
+                r.center = (int(self._my_scale(agent.get_pos()[0], x=True)), int(
+                    self._my_scale(agent.get_pos()[1], y=True)))
                 self.screen.blit(pokball, r)
 
             h = self.screen.get_height()
@@ -131,17 +134,17 @@ class PokemonGame:
 
     # decorate scale with the correct values
 
-    def my_scale(self, data, x=False, y=False):
+    def _my_scale(self, data, x=False, y=False):
         if x:
             return scale(data, 50, self.screen.get_width() - 50, self.min_x, self.max_x)
         if y:
             return scale(data, 50, self.screen.get_height() - 50, self.min_y, self.max_y)
 
-    def get_x_y(self, src: tuple, dest: tuple) -> tuple:
-        src_x = self.my_scale(src[1]['pos'][0], x=True)
-        src_y = self.my_scale(src[1]['pos'][1], y=True)
-        dest_x = self.my_scale(dest[1]['pos'][0], x=True)
-        dest_y = self.my_scale(dest[1]['pos'][1], y=True)
+    def _get_x_y(self, src: tuple, dest: tuple) -> tuple:
+        src_x = self._my_scale(src[1]['pos'][0], x=True)
+        src_y = self._my_scale(src[1]['pos'][1], y=True)
+        dest_x = self._my_scale(dest[1]['pos'][0], x=True)
+        dest_y = self._my_scale(dest[1]['pos'][1], y=True)
         return src_x, src_y, dest_x, dest_y
 
 
@@ -183,7 +186,3 @@ def arrow(screen, color, start, end, trirad) -> None:
                                      end[1] + trirad * math.cos(rotation - 120 * rad)),
                                     (end[0] + trirad * math.sin(rotation + 120 * rad),
                                      end[1] + trirad * math.cos(rotation + 120 * rad))))
-
-
-if __name__ == '__main__':
-    PokemonGame()

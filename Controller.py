@@ -125,7 +125,7 @@ class Controller:
                 if p.get_pos() not in self.pokemons[edge].get_pokemons():
                     self.pokemons[edge].get_pokemons().append(p.get_pos())
                     self.pokemons[edge].add_value(p.get_value())
-                if not self.pokemons[edge].get_toAgent():
+                if not self.pokemons[edge].get_is_attached():
                     x = self.dict_path[ag][0]
                     dis = nx.shortest_path_length(self._graph, x,
                                                   edge[0], weight='weight')
@@ -143,7 +143,7 @@ class Controller:
                         key = edge
             if min_dis != math.inf:
                 self.dict_path[ag] = min_path
-                self.pokemons[key].set_toAgent(True)
+                self.pokemons[key].set_is_attached(True)
 
     def get_pokemons(self):
         if self.client.is_running() != 'true':
