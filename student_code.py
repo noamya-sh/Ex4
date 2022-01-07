@@ -4,14 +4,14 @@ OOP - Ex4
 Very simple GUI example for python client to communicates with the server and "play the game!"
 """
 from types import SimpleNamespace
-from client import Client
+from client_python.client import Client
 import json
 from pygame import gfxdraw
 import pygame
 from pygame import *
 from Pokemon import *
 from Agent import *
-# from geometry.GraphAlgo import *
+# from img.GraphAlgo import *
 # init pygame
 WIDTH, HEIGHT = 1080, 720
 
@@ -84,8 +84,8 @@ client.start()
 The code below should be improved significantly:
 The GUI and the "algo" are mixed - refactoring using MVC design pattern is required.
 """
-pik = pygame.image.load("pik.png")
-pokball = pygame.image.load("Poke_Ball.png")
+pik = pygame.image.load("img/pik.png")
+pokball = pygame.image.load("img/Poke_Ball.png")
 path = []
 while client.is_running() == 'true':
     data = json.loads(client.get_pokemons())

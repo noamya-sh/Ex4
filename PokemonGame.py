@@ -1,5 +1,4 @@
 import math
-
 import numpy as np
 from pygame import gfxdraw, display, RESIZABLE, Color, MOUSEBUTTONDOWN
 import pygame as pg
@@ -19,7 +18,7 @@ def scale(data, min_screen, max_screen, min_data, max_data):
     return ((data - min_data) / (max_data - min_data)) * (max_screen - min_screen) + min_screen
 
 
-class Gui:
+class PokemonGame:
     def __init__(self):
         control = Controller()
         graph = control.get_graph()
@@ -35,16 +34,16 @@ class Gui:
         self.max_y = max(list(graph.nodes(data=True)), key=lambda n: n[1]['pos'][1])[1]['pos'][1]
         but = Button("Stop", (80, 80), Color(14, 112, 112))
         but.add_click_listener(control.stop_game)
-        pok1 = pg.image.load("pik.png")
+        pok1 = pg.image.load(".\\img\\pik.png")
         pok1.convert()
         pok1 = pg.transform.scale(pok1, (50, 50))
-        pokball = pg.image.load("Poke_Ball.png")
+        pokball = pg.image.load(".\\img\\Poke_Ball.png")
         pokball.convert()
         pokball = pg.transform.scale(pokball, (40, 40))
-        pok2 = pg.image.load('im.png')
+        pok2 = pg.image.load('.\\img\\im.png')
         pok2.convert()
         pok2 = pg.transform.scale(pok2, (50, 50))
-        bg = pg.image.load('forest.jpg')
+        bg = pg.image.load('.\\img\\forest.jpg')
         control.set_start()
         t = time.time()
         while control.is_run():
@@ -82,6 +81,7 @@ class Gui:
                 # draw the arrow
                 p = np.subtract((dest_x, dest_y), segment((src_x, src_y), (dest_x, dest_y)))
                 arrow(self.screen, Color(70, 31, 5), (src_x, src_y), p, 10)
+
             for n in graph.nodes(data=True):
                 x = self.my_scale(n[1]['pos'][0], x=True)
                 y = self.my_scale(n[1]['pos'][1], y=True)
@@ -98,15 +98,16 @@ class Gui:
             for p in pokemons:
                 if p.get_type() == -1:
                     r = pok1.get_rect()
-                    r.center = (int(self.my_scale(p._pos[0], x=True)), int(self.my_scale(p._pos[1], y=True)))
+                    r.center = (int(self.my_scale(p.get_pos()[0], x=True)), int(self.my_scale(p.get_pos()[1], y=True)))
                     self.screen.blit(pok1, r)
                 else:
                     r = pok2.get_rect()
-                    r.center = (int(self.my_scale(p._pos[0], x=True)), int(self.my_scale(p._pos[1], y=True)))
+                    r.center = (int(self.my_scale(p.get_pos()[0], x=True)), int(self.my_scale(p.get_pos()[1], y=True)))
                     self.screen.blit(pok2, r)
+
             for agent in agents:
                 r = pokball.get_rect()
-                r.center = (int(self.my_scale(agent._pos[0], x=True)), int(self.my_scale(agent._pos[1], y=True)))
+                r.center = (int(self.my_scale(agent.get_pos()[0], x=True)), int(self.my_scale(agent.get_pos()[1], y=True)))
                 self.screen.blit(pokball, r)
 
             h = self.screen.get_height()
@@ -185,4 +186,4 @@ def arrow(screen, color, start, end, trirad) -> None:
 
 
 if __name__ == '__main__':
-    Gui()
+    PokemonGame()

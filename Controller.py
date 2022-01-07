@@ -2,10 +2,10 @@ import json
 import math
 import random
 from typing import List
-from Edge_Pok import *
-from Agent import *
-from Pokemon import *
-from client import *
+from Edge_Pok import Edge_Pok
+from Agent import Agent
+from Pokemon import Pokemon
+from client_python.client import Client
 import networkx as nx
 import numpy as np
 
@@ -33,6 +33,7 @@ class Controller:
     def __init__(self):
         self.client = Client()
         self.client.start_connection(HOST, PORT)
+        self.client.log_in("316503986")
         self._graph = init_graph(self.client.get_graph())
 
         self.pokemons = {}
@@ -68,17 +69,17 @@ class Controller:
         d = json.loads(self.client.get_agents())
         self.agents = {a['Agent']['id']: Agent(**a['Agent']) for a in d['Agents']}
         for k, v in self.agents.items():
-            self.dict_path[k] = [v.src]
+            self.dict_path[k] = [v.get_src()]
 
     def get_graph(self):
         return self._graph
 
     def _get_next(self, ag: Agent) -> int:
-        if not self.dict_path[ag.id]:
+        if not self.dict_path[ag.get_id()]:
             return None
-        if ag.src == self.dict_path[ag.id][0] and len(self.dict_path[ag.id]) > 1:
-            self.dict_path[ag.id].pop(0)
-        return self.dict_path[ag.id][0]
+        if ag.get_src() == self.dict_path[ag.get_id()][0] and len(self.dict_path[ag.get_id()]) > 1:
+            self.dict_path[ag.get_id()].pop(0)
+        return self.dict_path[ag.get_id()][0]
 
     def _on_edge(self, p: Pokemon, edge) -> bool:
         node_1 = self._graph.nodes[edge[0]]
@@ -109,9 +110,9 @@ class Controller:
         check = []
         self.pokemons = {}
 
-        sor = sorted(self.get_agents(), key=lambda a: a.speed)
+        sor = sorted(self.get_agents(), key=lambda a: a.get_speed())
 
-        ind_ag = [i.id for i in sor]
+        ind_ag = [i.get_id() for i in sor]
         for ag in ind_ag:
             min_dis = math.inf
             min_path = []
@@ -132,7 +133,7 @@ class Controller:
                                           edge[0], weight='weight')
                     pa.append(edge[1])
                     dis += self._graph.edges[edge[0], edge[1]]['weight']
-                    sp = (dis * sor[ag].speed) / self.pokemons[edge].get_value()
+                    sp = (dis * sor[ag].get_speed()) / self.pokemons[edge].get_value()
                     # if set(pa[-2:-1]).issubset(self.dict_path[ag]):
                     #     continue
 
@@ -167,19 +168,17 @@ class Controller:
         flag = False
         flag2 = False
         for a in agents:
-            # print(a.id, self.dict_path[a.id])
             for pos in poks:
                 if dist(a.get_pos(), pos) < 1e-09:
                     flag2 = True
-            if a.dest == -1:
+            if a.get_dest() == -1:
                 next_node = self._get_next(a)
                 self.client.choose_next_edge(
-                    '{"agent_id":' + str(a.id) + ', "next_node_id":' + str(next_node) + '}')
+                    '{"agent_id":' + str(a.get_id()) + ', "next_node_id":' + str(next_node) + '}')
                 flag = True
         d = json.loads(self.client.get_info())
         k = d['GameServer']['moves']
         if k < t * 10 and (not flag or flag2):
-            # print(k)
             k += 1
             self.client.move()
         return k
@@ -193,7 +192,7 @@ class Controller:
         return d['GameServer']['moves']
 
     def get_time_to_end(self):
-        x = round(int(self.client.time_to_end())/ 1000,ndigits=2)
+        x = round(int(self.client.time_to_end()) / 1000, ndigits=2)
         return str(x)
 
     def stop_game(self):
@@ -205,5 +204,3 @@ class Controller:
 
     def is_run(self) -> bool:
         return self.client.is_running() == 'true'
-
-
