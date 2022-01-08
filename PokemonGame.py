@@ -117,7 +117,7 @@ class PokemonGame:
             w = self.screen.get_width()
             pg.draw.rect(self.screen, Color(200, 192, 7), pg.Rect(w - 280, h - 80, 200, 80))
             pg.draw.rect(self.screen, Color(255, 255, 255), pg.Rect(w - 280, h - 80, 200, 80), width=1)
-            f = FONT.render("Score: " + str(control.get_score()), True, Color(0, 0, 0))
+            f = FONT.render("Grade: " + str(control.get_grade()), True, Color(0, 0, 0))
             self.screen.blit(f, (w - 265, h - 80))
             f = FONT.render("Moves: " + str(control.get_moves()), True, Color(0, 0, 0))
             self.screen.blit(f, (w - 265, h - 40))
