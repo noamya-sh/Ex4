@@ -49,8 +49,9 @@ In this class we implemented the graphical strcture of the game. We used `pygame
 We initialized a `Controller` variable and from it we got the data of the graph. As long as the controller is connected to the server (ie the game is not over), we will get information about the locations of the agents and Pokemon, drew the nodes and edges and on them the Pokemon and agents (Pikachu if the src id of the edge is larger than the dest id, and otherwise 'Squirtle'. 'Pokeball' represents the agents.)
 Also appear on the screen the time left for the game, the score and the sum of the 'move' commands sent to the server. There is also a 'stop' button where you can stop the game at any given moment.
 In addition, we wrote functions for drawing a line and an arrow and performing a scale to position.<br>
-Agent and Pokemon moves are not controlled by PokemonGame but are controlled by the controller. In PokemonGame we will only send a request to the controller to update the information in his possession.
-
+Agent and Pokemon moves are not controlled by PokemonGame but are controlled by the controller. In PokemonGame we will only send a request to the controller to update the information in his possession.<br><br>
+* **`Button`** produces a button to stop the game. **`Edge_pok`** is a class used for information about the amount of values that are on the edge.
+**`Pokemon`** and **`Agent`** are used for easy access to agents and pokemons received from the server.
 <br><br>
 
 ### Performances
@@ -65,7 +66,7 @@ Agent and Pokemon moves are not controlled by PokemonGame but are controlled by 
 |6|79|
 |7|310|
 |8|125|
-|9|395|
+|9|402|
 |10|59|
 |11|1679|
 |12|40|
