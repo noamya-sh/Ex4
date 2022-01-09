@@ -63,7 +63,6 @@ class Controller:
         d = json.loads(self.client.get_info())
         k = d['GameServer']['agents']
         self.pokemons = dict(sorted(self.pokemons.items(), key=lambda t: t[1].get_value()))
-        print(self.pokemons.items())
         tmp = []
         i = 0
         it = iter(self.pokemons.keys())

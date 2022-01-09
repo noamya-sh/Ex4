@@ -20,15 +20,11 @@ The structure of the project is done according to **MVC** so that the `PokemonGa
 ### Run Game
 1. Make sure your python has 'Numpy', 'Pygame', and 'Networkx' libraries installed.
 2. Download rar of the project from here __
-3. Open 2 cmd windows from the folder to which you extracted the files. First run - 
+3. Open cmd window from the folder to which you extracted the files and run - 
  ```
-java -jar Ex4_Server_v0.0.jar <[0-15]>
+python Ex4.py <[0-15]>
 ```
-When at the end you have to choose a digit that represents the case you want to run.
-In the second window run -
- ```
-python Ex4.py
-```
+When the number is between 0 and 15 it will be the case that will be displayed in the game.
 
 
 ### Classes and functions
