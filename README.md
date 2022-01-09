@@ -33,8 +33,8 @@ When the number is between 0 and 15 it will be the case that will be displayed i
 * **`Controller`**:<br>
 In this class we first built a basic build of the game, made a connection to the server and then kept the data with us - we got the data on Pokemon locations and value, and plotted by edge how many 'Pokemon' values ​​there are on it, then sorted by values ​​(from high to low).
 We then add agents (the amount given in json given by the server) and place them according to the sorted array of the edges on which the Pokemon are located. If there are more agents left place them randomly.
-We keep a list of each agent's his path so we can always know what his next step is. In init function of controller we will list the source of the edge to which it is embedded.
-In *'init_graph'* you initialize a graph from the json format to a weighted directed graph from the networkx directory
+We keep a list of each agent's his path so we can always know what his next step is.<br> In init function of controller we will list the source of the edge to which it is embedded.
+In *'init_graph'* you initialize a graph from the json format to a weighted directed graph from the networkx libary.<br>
 In the *'get_next'* function we return the next node to which the agent has to go according to the data that appears in his path.<br>
 In the *'find_edge'* and *'on_edge'* function we calculate according to the position of the Pokemon on which edge it is located.<br>
 In the '*attach'* function we sort the edgepoke according to their value, and the agents according to their speed,
