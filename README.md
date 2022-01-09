@@ -19,7 +19,7 @@ The structure of the project is done according to **MVC** so that the `PokemonGa
 
 ### Run Game
 1. Make sure your python has 'Numpy', 'Pygame', and 'Networkx' libraries installed.
-2. Download rar of the project from here __
+2. Download rar of the project from [here](https://github.com/noamya-sh/Ex4/releases/tag/v1.0)
 3. Open 2 cmd windows from the folder to which you extracted the files. First run - 
  ```
 java -jar Ex4_Server_v0.0.jar <[0-15]>
