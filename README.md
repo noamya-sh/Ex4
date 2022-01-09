@@ -1,5 +1,6 @@
 
-![ezgif com-gif-maker](https://user-images.githubusercontent.com/77248387/148675942-80ada8b0-3f19-43ee-9326-0645ddae2838.gif)
+![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/77248387/148690669-f29886ad-cebb-4425-9b16-c0c6747e4c81.gif)
+
 
 
 # Pokemon Game - Ex4
@@ -19,12 +20,16 @@ The structure of the project is done according to **MVC** so that the `PokemonGa
 
 ### Run Game
 1. Make sure your python has 'Numpy', 'Pygame', and 'Networkx' libraries installed.
-2. Download rar of the project from here __
-3. Open cmd window from the folder to which you extracted the files and run - 
+2. Download rar of the project from [here](https://github.com/noamya-sh/Ex4/releases/tag/v1.0)
+3. Open 2 cmd windows from the folder to which you extracted the files. First run - 
  ```
-python Ex4.py <[0-15]>
+java -jar Ex4_Server_v0.0.jar <[0-15]>
 ```
-When the number is between 0 and 15 it will be the case that will be displayed in the game.
+When at the end you have to choose a digit that represents the case you want to run.
+In the second window run -
+ ```
+python Ex4.py
+```
 
 
 ### Classes and functions
