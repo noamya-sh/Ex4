@@ -1,6 +1,6 @@
-<p align="center">
-  <img src="https://user-images.githubusercontent.com/77248387/148674772-f9b01ba4-74ee-4d78-b468-c55c35dde741.jpg" width="450" height="190">
-</p>
+
+![ezgif com-gif-maker](https://user-images.githubusercontent.com/77248387/148675942-80ada8b0-3f19-43ee-9326-0645ddae2838.gif)
+
 
 # Pokemon Game - Ex4
 #### Noamya Shani and Eitan Shenkolevski
@@ -16,6 +16,9 @@ The structure of the project is done according to **MVC** so that the `PokemonGa
 <br><br>
 *UML of the project:*<br>
 ![image](https://user-images.githubusercontent.com/77248387/148674616-9f4ffb04-9091-443c-8453-c8c559828b9d.png)
+
+### Run Game
+
 
 Controller class:
 In this class we first built a basic build of the game, made a connection to the server and then kept the data with us - we got the data on Pokemon locations and value, and plotted by edge how many 'Pokemon' values ​​there are on it, then sorted by values ​​(from high to low).
@@ -33,3 +36,7 @@ During the game run we constantly re-insert the agents (by the 'attach' function
 Run the program-
 In order to run the program, the following command must be entered in the command line-
 'java -jar Ex4_Server_v0.0.jar 0' (where the last digit represents which 'case' you want to run, there are 16 cases). After giving the command, one should run the Ex4.py file and then the game will start running.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/77248387/148674772-f9b01ba4-74ee-4d78-b468-c55c35dde741.jpg" width="450" height="190">
+</p>
+
