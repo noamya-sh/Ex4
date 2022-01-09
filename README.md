@@ -1,7 +1,22 @@
-At this project we design a “Pokemon game” in which given a weighted graph, a set of “Agents” should be located on it so they could “catch” as many “Pokemons” as possible. The pokemons are located on the graph’s (directed) edges, therefore, the agent needs to take (aka walk) the proper edge to “grab” the pokemon.
-The game is run in the form of a client and server. The server keeps the data and updates it all the time, and the client actually 'creates' the agents (based on information from the server) and places them in the desired places and then constantly updates what the next step they need to do.
-To execute the program, we created several classes, some secondary and some central - the secondary classes are 'pokemon', 'agent' designed to create a 'pokemon' or 'agent what json object the server gives', and an 'edgepoke' class that we use to know how much The values ​​of the Pokemon that are on a particular edge and whether we have already assigned an agent to it.
-The main classes are 'Controller' and 'Gui', where 'Controller' is the main calculation of the agents' locations and their next step as well as giving the command when to move them. The role of the 'Gui' class is to draw the graph with the Pokemon and agents and to simulate the movement of the agents, the capture of the Pokemon and their reappearance in another location.
+<p align="center">
+  <img src="https://user-images.githubusercontent.com/77248387/148674772-f9b01ba4-74ee-4d78-b468-c55c35dde741.jpg" width="450" height="190">
+</p>
+
+# Pokemon Game - Ex4
+#### Noamya Shani and Eitan Shenkolevski
+
+
+### Abstract
+In this project we design a "Pokemon game" where given a weighted graph, a group of "agents" must be placed on it so that they can "catch" as much "Pokemon" as possible. The Pokemon are placed at the (directed) edges of the graph, therefore, the agent must take (also known to walk) the appropriate edge to "catch" the Pokemon.
+The game is run in the form of a client and server. The server keeps the data and updates it all the time, and the client receives information from the server and sends commands back to the server (such as where to send the agent and when to move it).
+To run the program, we created several classes, some secondary and some central - the secondary classes are `Pokemon`, `Agent` designed to create Pokemon or Agent what json object the server gives, and `edge_pok` class which we use to know How many Pokemon values ​​are at a certain end and have we already assigned him an agent.
+
+The main classes are `Controller` and `PokemonGame`, where `Controller` is the main calculation of the agents' locations and their next step as well as giving the command when to move them. The role of the `PokemonGame` class is to draw the graph with the Pokemon and agents and to simulate the movement of the agents, the capture of the Pokemon and their reappearance in another location.
+The structure of the project is done according to **MVC** so that the `PokemonGame` department draws the game according to data it receives from the `Controller`, and only the `Controller` has access to send and receive data from the server.
+<br><br>
+*UML of the project:*<br>
+![image](https://user-images.githubusercontent.com/77248387/148674616-9f4ffb04-9091-443c-8453-c8c559828b9d.png)
+
 Controller class:
 In this class we first built a basic build of the game, made a connection to the server and then kept the data with us - we got the data on Pokemon locations and value, and plotted by edge how many 'Pokemon' values ​​there are on it, then sorted by values ​​(from high to low).
 We then add agents (the amount given in json given by the server) and place them according to the sorted array of the edges on which the Pokemon are located. If there are more agents left place them randomly.
