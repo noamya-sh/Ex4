@@ -19,6 +19,10 @@ def scale(data, min_screen, max_screen, min_data, max_data):
 
 
 class PokemonGame:
+    """
+    This class is GUI implemention for Pokemon game using the pygame and Numpy library.
+    The class get information from Controller and draw on the screen.
+    """
     def __init__(self):
         control = Controller()
         graph = control.get_graph()
@@ -45,18 +49,20 @@ class PokemonGame:
         pok2 = pg.transform.scale(pok2, (50, 50))
         bg = pg.image.load('.\\img\\forest.jpg')
         control.set_start()
-        t = time.time()
+        start = time.time()
+        # draw as long as there is a connection to the server
         while control.is_run():
             agents = control.get_agents()
             pokemons = control.get_pokemons()
 
+            # check event
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     pg.quit()
                     exit(0)
                 elif event.type == MOUSEBUTTONDOWN:
                     but.check()
-
+            # draw background
             bg = pg.transform.scale(bg, self.screen.get_size())
             rect = bg.get_rect()
             self.screen.blit(bg, rect)
@@ -95,6 +101,7 @@ class PokemonGame:
                 rect = id_srf.get_rect(center=(x, y))
                 self.screen.blit(id_srf, rect)
 
+            # draw pokemons by their type
             for p in pokemons:
                 if p.get_type() == -1:
                     r = pok1.get_rect()
@@ -106,7 +113,7 @@ class PokemonGame:
                     r.center = (int(self._my_scale(p.get_pos()[0], x=True)), int(
                         self._my_scale(p.get_pos()[1], y=True)))
                     self.screen.blit(pok2, r)
-
+            # draw agents
             for agent in agents:
                 r = pokball.get_rect()
                 r.center = (int(self._my_scale(agent.get_pos()[0], x=True)), int(
@@ -115,6 +122,8 @@ class PokemonGame:
 
             h = self.screen.get_height()
             w = self.screen.get_width()
+
+            # draw details of moves, time and grade
             pg.draw.rect(self.screen, Color(200, 192, 7), pg.Rect(w - 280, h - 80, 200, 80))
             pg.draw.rect(self.screen, Color(255, 255, 255), pg.Rect(w - 280, h - 80, 200, 80), width=1)
             f = FONT.render("Grade: " + str(control.get_grade()), True, Color(0, 0, 0))
@@ -128,12 +137,12 @@ class PokemonGame:
 
             # refresh rate
             clock.tick(600)
+            # update data of agents and pokemons.
             control.attach()
             now = time.time()
-            control.moving(now - t)
+            control.moving(now - start)
 
     # decorate scale with the correct values
-
     def _my_scale(self, data, x=False, y=False):
         if x:
             return scale(data, 50, self.screen.get_width() - 50, self.min_x, self.max_x)
@@ -141,6 +150,11 @@ class PokemonGame:
             return scale(data, 50, self.screen.get_height() - 50, self.min_y, self.max_y)
 
     def _get_x_y(self, src: tuple, dest: tuple) -> tuple:
+        """
+        :param src: src point
+        :param dest: dest point
+        :return: x,y for each point
+        """
         src_x = self._my_scale(src[1]['pos'][0], x=True)
         src_y = self._my_scale(src[1]['pos'][1], y=True)
         dest_x = self._my_scale(dest[1]['pos'][0], x=True)
@@ -186,3 +200,5 @@ def arrow(screen, color, start, end, trirad) -> None:
                                      end[1] + trirad * math.cos(rotation - 120 * rad)),
                                     (end[0] + trirad * math.sin(rotation + 120 * rad),
                                      end[1] + trirad * math.cos(rotation + 120 * rad))))
+if __name__ == '__main__':
+    PokemonGame()

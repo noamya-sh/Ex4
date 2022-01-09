@@ -41,7 +41,7 @@ def init_graph(json_str) -> nx.DiGraph:
 
 class Controller:
     """
-
+    The controller receives and sends information to the server according to the game data.
     """
     def __init__(self) -> None:
         self.client = Client()
@@ -53,12 +53,17 @@ class Controller:
         # insert each pokemons to his edge
         for p in tmp:
             edge = self._find_edge(p)
-            self.pokemons[edge] = Edge_Pok(p.get_pos())
+            if edge not in self.pokemons.keys():
+                self.pokemons[edge] = Edge_Pok(edge)
+            if p.get_pos() not in self.pokemons[edge].get_pokemons():
+                self.pokemons[edge].get_pokemons().append(p.get_pos())
+                self.pokemons[edge].add_value(p.get_value())
 
         self.dict_path = {}
         d = json.loads(self.client.get_info())
         k = d['GameServer']['agents']
-        self.pokemons = dict(sorted(self.pokemons.items(), key=lambda t: t[1]))
+        self.pokemons = dict(sorted(self.pokemons.items(), key=lambda t: t[1].get_value()))
+        print(self.pokemons.items())
         tmp = []
         i = 0
         it = iter(self.pokemons.keys())
