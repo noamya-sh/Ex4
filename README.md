@@ -1,5 +1,6 @@
 
-![ezgif com-gif-maker](https://user-images.githubusercontent.com/77248387/148675942-80ada8b0-3f19-43ee-9326-0645ddae2838.gif)
+![ezgif com-gif-maker (1)](https://user-images.githubusercontent.com/77248387/148690669-f29886ad-cebb-4425-9b16-c0c6747e4c81.gif)
+
 
 
 # Pokemon Game - Ex4
