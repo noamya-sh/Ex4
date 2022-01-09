@@ -136,7 +136,7 @@ class PokemonGame:
             display.update()
 
             # refresh rate
-            clock.tick(600)
+            clock.tick(60)
             # update data of agents and pokemons.
             control.attach()
             now = time.time()

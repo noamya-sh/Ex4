@@ -212,7 +212,7 @@ class Controller:
             close_to_pok = False
             for a in agents:
                 for pos in poks:
-                    if dist(a.get_pos(), pos) < 1e-09:
+                    if dist(a.get_pos(), pos) < 0.001:
                         close_to_pok = True
                 if a.get_dest() == -1:
                     next_node = self._get_next(a)
